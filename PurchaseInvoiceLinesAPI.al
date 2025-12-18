@@ -19,14 +19,12 @@ page 50100 "APIV2 - Purchase Invoice Lines"
         {
             repeater(Group)
             {
-                // --- SYSTEM IDS ---
                 field(id; Rec.SystemId)
                 {
                     Caption = 'Id';
                     Editable = false;
                 }
                 
-                // --- HEADER LINKING ---
                 field(documentId; HeaderId)
                 {
                     Caption = 'Document Id';
@@ -34,7 +32,7 @@ page 50100 "APIV2 - Purchase Invoice Lines"
                     var
                         PurchaseHeader: Record "Purchase Header";
                     begin
-                        if Rec."Document No." <> '' then exit; // Skip if already linked via URL
+                        if Rec."Document No." <> '' then exit; 
                         if PurchaseHeader.GetBySystemId(HeaderId) then begin
                             Rec.Validate("Document Type", PurchaseHeader."Document Type");
                             Rec.Validate("Document No.", PurchaseHeader."No.");
@@ -47,17 +45,38 @@ page 50100 "APIV2 - Purchase Invoice Lines"
                     Caption = 'Sequence';
                 }
 
-                // --- TYPE & NUMBER ---
-                field(lineType; Rec.Type)
+                // --- CHANGED: Using Variable Proxy instead of Rec.Type ---
+                field(lineType; LineTypeBuffer)
                 {
                     Caption = 'Line Type';
+                    ToolTip = 'Specifies the type of line (Account, Item, etc.)';
+                    
+                    trigger OnValidate()
+                    begin
+                        case LowerCase(LineTypeBuffer) of
+                            'account', 'g/l account': 
+                                Rec.Validate(Type, Rec.Type::"G/L Account");
+                            'item': 
+                                Rec.Validate(Type, Rec.Type::Item);
+                            'resource': 
+                                Rec.Validate(Type, Rec.Type::Resource);
+                            'fixed asset': 
+                                Rec.Validate(Type, Rec.Type::"Fixed Asset");
+                            'charge (item)': 
+                                Rec.Validate(Type, Rec.Type::"Charge (Item)");
+                            else
+                                Error('Invalid Line Type: %1. Allowed values are: Account, Item, Resource, Fixed Asset, Charge (Item)', LineTypeBuffer);
+                        end;
+                    end;
                 }
+                
                 field(lineObjectNumber; Rec."No.") 
                 {
                     Caption = 'No.';
                 }
 
-                // --- ID LOOKUPS (Standard API Behavior) ---
+                // ... (Keep the rest of your layout exactly the same) ...
+                // Standard ItemId/AccountId lookups, Description, Quantity, etc.
                 field(itemId; ItemId)
                 {
                     Caption = 'Item Id';
@@ -85,116 +104,55 @@ page 50100 "APIV2 - Purchase Invoice Lines"
                     end;
                 }
 
-                // --- DESCRIPTION & VARIANT ---
-                field(description; Rec.Description)
-                {
-                    Caption = 'Description';
-                }
-                field(itemVariantId; VariantId)
+                field(description; Rec.Description) { Caption = 'Description'; }
+                field(itemVariantId; VariantId) 
                 {
                     Caption = 'Item Variant Id';
                     trigger OnValidate()
-                    var
-                        ItemVariant: Record "Item Variant";
+                    var ItemVariant: Record "Item Variant";
                     begin
-                        if ItemVariant.GetBySystemId(VariantId) then
-                            Rec.Validate("Variant Code", ItemVariant.Code);
+                        if ItemVariant.GetBySystemId(VariantId) then Rec.Validate("Variant Code", ItemVariant.Code);
                     end;
                 }
 
-                // --- QUANTITY & UOM ---
-                field(quantity; Rec.Quantity)
-                {
-                    Caption = 'Quantity';
-                }
+                field(quantity; Rec.Quantity) { Caption = 'Quantity'; }
+                
                 field(unitOfMeasureId; UOMId)
                 {
                     Caption = 'Unit Of Measure Id';
                     trigger OnValidate()
-                    var
-                        UOM: Record "Unit of Measure";
+                    var UOM: Record "Unit of Measure";
                     begin
-                        if UOM.GetBySystemId(UOMId) then
-                            Rec.Validate("Unit of Measure Code", UOM.Code);
+                        if UOM.GetBySystemId(UOMId) then Rec.Validate("Unit of Measure Code", UOM.Code);
                     end;
                 }
-                field(unitOfMeasureCode; Rec."Unit of Measure Code")
-                {
-                    Caption = 'Unit of Measure Code';
-                }
+                field(unitOfMeasureCode; Rec."Unit of Measure Code") { Caption = 'Unit of Measure Code'; }
 
-                // --- PRICING ---
-                field(unitCost; Rec."Direct Unit Cost")
-                {
-                    Caption = 'Unit Cost';
-                }
-                field(discountAmount; Rec."Line Discount Amount")
-                {
-                    Caption = 'Discount Amount';
-                }
-                field(discountPercent; Rec."Line Discount %")
-                {
-                    Caption = 'Discount Percent';
-                }
+                field(unitCost; Rec."Direct Unit Cost") { Caption = 'Unit Cost'; }
+                field(discountAmount; Rec."Line Discount Amount") { Caption = 'Discount Amount'; }
+                field(discountPercent; Rec."Line Discount %") { Caption = 'Discount Percent'; }
 
-                // --- AMOUNTS & TAX ---
-                field(amountExcludingTax; Rec.Amount)
-                {
-                    Caption = 'Amount Excluding Tax';
-                    Editable = false; 
-                }
-                field(amountIncludingTax; Rec."Amount Including VAT")
-                {
-                    Caption = 'Amount Including Tax';
-                    Editable = false;
-                }
-                field(taxCode; Rec."VAT Prod. Posting Group")
-                {
-                    Caption = 'Tax Code';
-                }
-                field(netAmount; Rec.Amount)
-                {
-                    Caption = 'Net Amount';
-                    Editable = false;
-                }
-                field(netTaxAmount; Rec."Amount Including VAT" - Rec.Amount)
-                {
-                    Caption = 'Net Tax Amount';
-                    Editable = false;
-                }
-                field(netAmountIncludingTax; Rec."Amount Including VAT")
-                {
-                    Caption = 'Net Amount Including Tax';
-                    Editable = false;
-                }
+                field(amountExcludingTax; Rec.Amount) { Caption = 'Amount Excluding Tax'; Editable = false; }
+                field(amountIncludingTax; Rec."Amount Including VAT") { Caption = 'Amount Including Tax'; Editable = false; }
+                field(taxCode; Rec."VAT Prod. Posting Group") { Caption = 'Tax Code'; }
+                field(netAmount; Rec.Amount) { Caption = 'Net Amount'; Editable = false; }
+                field(netTaxAmount; Rec."Amount Including VAT" - Rec.Amount) { Caption = 'Net Tax Amount'; Editable = false; }
+                field(netAmountIncludingTax; Rec."Amount Including VAT") { Caption = 'Net Amount Including Tax'; Editable = false; }
                 
-                // --- DATES & LOCATION ---
-                field(expectedReceiptDate; Rec."Expected Receipt Date")
-                {
-                    Caption = 'Expected Receipt Date';
-                }
+                field(expectedReceiptDate; Rec."Expected Receipt Date") { Caption = 'Expected Receipt Date'; }
+                
                 field(locationId; LocationId)
                 {
                     Caption = 'Location Id';
                     trigger OnValidate()
-                    var
-                        Location: Record Location;
+                    var Location: Record Location;
                     begin
-                        if Location.GetBySystemId(LocationId) then
-                            Rec.Validate("Location Code", Location.Code);
+                        if Location.GetBySystemId(LocationId) then Rec.Validate("Location Code", Location.Code);
                     end;
                 }
 
-                // --- CUSTOM WHT FIELDS ---
-                field(irpfTaxPercent; Rec."IRPF Withholding Tax %")
-                {
-                    Caption = 'IRPF Withholding Tax %';
-                }
-                field(irpfTaxAmount; Rec."IRPF Withholding Tax amt.")
-                {
-                    Caption = 'IRPF Withholding Tax Amount';
-                    Editable = false; 
-                }
+                field(irpfTaxPercent; Rec."IRPF Withholding Tax %") { Caption = 'IRPF Withholding Tax %'; }
+                field(irpfTaxAmount; Rec."IRPF Withholding Tax amt.") { Caption = 'IRPF Withholding Tax Amount'; Editable = false; }
             }
         }
     }
@@ -206,14 +164,12 @@ page 50100 "APIV2 - Purchase Invoice Lines"
         UOMId: Guid;
         VariantId: Guid;
         LocationId: Guid;
-
-    // --- TRIGGERS ---
+        LineTypeBuffer: Text; // New variable to hold the JSON string
 
     trigger OnInsertRecord(BelowxRec: Boolean): Boolean
     var
         PurchaseHeader: Record "Purchase Header";
     begin
-        // Fallback for Flat Inserts
         if (Rec."Document No." = '') and (not IsNullGuid(HeaderId)) then begin
             if PurchaseHeader.GetBySystemId(HeaderId) then begin
                 Rec.Validate("Document Type", PurchaseHeader."Document Type");
@@ -231,11 +187,26 @@ page 50100 "APIV2 - Purchase Invoice Lines"
         ItemVariant: Record "Item Variant";
         Location: Record Location;
     begin
-        // Populate HeaderId
+        // --- Map Enum to String for GET requests ---
+        case Rec.Type of
+            Rec.Type::"G/L Account":
+                LineTypeBuffer := 'Account';
+            Rec.Type::Item:
+                LineTypeBuffer := 'Item';
+            Rec.Type::"Fixed Asset":
+                LineTypeBuffer := 'Fixed Asset';
+            Rec.Type::Resource:
+                LineTypeBuffer := 'Resource';
+            Rec.Type::"Charge (Item)":
+                LineTypeBuffer := 'Charge (Item)';
+            else
+                LineTypeBuffer := Format(Rec.Type);
+        end;
+
+        // --- Standard Logic ---
         if PurchaseHeader.Get(Rec."Document Type", Rec."Document No.") then
             HeaderId := PurchaseHeader.SystemId;
         
-        // Populate Helper GUIDs for reading
         if Rec.Type = Rec.Type::Item then begin
             if Item.Get(Rec."No.") then ItemId := Item.SystemId;
         end else begin
@@ -249,7 +220,7 @@ page 50100 "APIV2 - Purchase Invoice Lines"
         end;
 
         if UOM.Get(Rec."Unit of Measure Code") then UOMId := UOM.SystemId else Clear(UOMId);
-        // Note: Variant lookup requires Item No filter, simplified here:
+        
         if (Rec."Variant Code" <> '') and (Rec.Type = Rec.Type::Item) then begin
            if ItemVariant.Get(Rec."No.", Rec."Variant Code") then VariantId := ItemVariant.SystemId;
         end else Clear(VariantId);
