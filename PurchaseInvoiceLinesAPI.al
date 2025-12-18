@@ -2,7 +2,7 @@ page 50100 "APIV2 - Purchase Invoice Lines"
 {
     PageType = API;
     Caption = 'Custom Purchase Invoice Lines';
-    APIPublisher = 'custom';
+    APIPublisher = 'precoro';
     APIGroup = 'finance';
     APIVersion = 'v2.0';
     EntityName = 'purchaseInvoiceLine';
