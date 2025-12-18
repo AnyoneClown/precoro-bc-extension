@@ -49,9 +49,9 @@ page 50101 "APIV2 - Purchase Invoices"
                     EntityName = 'purchaseInvoiceLine';
                     EntitySetName = 'purchaseInvoiceLines';
                     
-                    // FIX: We link using the ACTUAL table fields ("Document No." and "Document Type")
-                    // The system handles the translation from ID to No automatically.
-                    SubPageLink = "Document No." = field("No."), "Document Type" = field("Document Type");
+                    // FIX: Put "Document Type" FIRST.
+                    // This ensures the line knows it is an INVOICE before it checks the Number.
+                    SubPageLink = "Document Type" = field("Document Type"), "Document No." = field("No.");
                 }
             }
         }
