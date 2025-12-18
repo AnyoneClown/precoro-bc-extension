@@ -30,7 +30,7 @@ page 50101 "APIV2 - Purchase Invoices"
                 {
                     Caption = 'No';
                 }
-                field(externalDocumentNumber; Rec."Vendor Invoice No.")
+                field(vendorInvoiceNumber; Rec."Vendor Invoice No.")
                 {
                     Caption = 'Vendor Invoice No.';
                 }
