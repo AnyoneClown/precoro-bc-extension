@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Microsoft cloud sandbox",
+            "name": "Rakuten Sandbox",
             "request": "launch",
             "type": "al",
             "environmentType": "Sandbox",
@@ -15,7 +15,18 @@
             "enableSqlInformationDebugger": true
         },
         {
-            "name": "AL: Generated Snapshot request",
+            "name": "Rakuten Snapshots Production",
+            "request": "snapshotInitialize",
+            "type": "al",
+            "environmentType": "Production",
+            "environmentName": "Production",
+            "sessionId": 88135,
+            "breakOnNext": "WebClient",
+            "executionContext": "DebugAndProfile",
+            "tenant": "3890a25c-7432-405b-a62c-c2316abdd3ac"
+        },
+        {
+            "name": "Rakuten Snapshots Sandbox",
             "request": "snapshotInitialize",
             "type": "al",
             "environmentType": "Sandbox",

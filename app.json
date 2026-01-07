@@ -52,8 +52,8 @@
     }
   ],
   "resourceExposurePolicy": {
-    "allowDebugging": true,
-    "allowDownloadingSource": true,
+    "allowDebugging": false,
+    "allowDownloadingSource": false,
     "includeSourceInSymbolFile": true
   },
   "runtime": "8.0",
