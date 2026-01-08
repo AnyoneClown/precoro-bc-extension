@@ -10,7 +10,7 @@ page 50101 "APIV2 - Purchase Invoices"
     SourceTable = "Purchase Header";
     DelayedInsert = true;
     ODataKeyFields = SystemId;
-    
+
     // Filter to show only Invoices
     SourceTableView = where("Document Type" = const(Invoice));
 
@@ -34,11 +34,16 @@ page 50101 "APIV2 - Purchase Invoices"
                 {
                     Caption = 'Vendor Invoice No.';
                 }
-                
+
                 // --- DATES ---
-                field(invoiceDate; Rec."Document Date")
+                field(invoiceDate; InvoiceDateVar)
                 {
                     Caption = 'Invoice Date';
+                    trigger OnValidate()
+                    begin
+                        IsInvoiceDateSet := true;
+                        Rec.Validate("Document Date", InvoiceDateVar);
+                    end;
                 }
                 field(postingDate; Rec."Posting Date")
                 {
@@ -128,7 +133,7 @@ page 50101 "APIV2 - Purchase Invoices"
                 // --- DIMENSIONS & CURRENCY ---
                 field(shortcutDimension1Code; Rec."Shortcut Dimension 1 Code") { Caption = 'Shortcut Dimension 1 Code'; }
                 field(shortcutDimension2Code; Rec."Shortcut Dimension 2 Code") { Caption = 'Shortcut Dimension 2 Code'; }
-                
+
                 field(currencyId; CurrencyId)
                 {
                     Caption = 'Currency Id';
@@ -144,29 +149,29 @@ page 50101 "APIV2 - Purchase Invoices"
 
                 // --- FINANCIALS ---
                 field(pricesIncludeTax; Rec."Prices Including VAT") { Caption = 'Prices Include Tax'; }
-                
-                field(totalAmountExcludingTax; Rec.Amount) 
-                { 
-                    Caption = 'Total Amount Excluding Tax'; 
-                    Editable = false; 
+
+                field(totalAmountExcludingTax; Rec.Amount)
+                {
+                    Caption = 'Total Amount Excluding Tax';
+                    Editable = false;
                 }
-                field(totalTaxAmount; Rec."Amount Including VAT" - Rec.Amount) 
-                { 
-                    Caption = 'Total Tax Amount'; 
-                    Editable = false; 
+                field(totalTaxAmount; Rec."Amount Including VAT" - Rec.Amount)
+                {
+                    Caption = 'Total Tax Amount';
+                    Editable = false;
                 }
-                field(totalAmountIncludingTax; Rec."Amount Including VAT") 
-                { 
-                    Caption = 'Total Amount Including Tax'; 
-                    Editable = false; 
+                field(totalAmountIncludingTax; Rec."Amount Including VAT")
+                {
+                    Caption = 'Total Amount Including Tax';
+                    Editable = false;
                 }
-                
+
                 field(status; Rec.Status) { Caption = 'Status'; }
-                
-                field(lastModifiedDateTime; Rec.SystemModifiedAt) 
-                { 
-                    Caption = 'Last Modified Date Time'; 
-                    Editable = false; 
+
+                field(lastModifiedDateTime; Rec.SystemModifiedAt)
+                {
+                    Caption = 'Last Modified Date Time';
+                    Editable = false;
                 }
 
                 // --- SPECIFIC REQUEST: WHT (Withholding Tax) ---
@@ -193,12 +198,38 @@ page 50101 "APIV2 - Purchase Invoices"
         VendorId: Guid;
         PayToVendorId: Guid;
         CurrencyId: Guid;
+        InvoiceDateVar: Date;
+        IsInvoiceDateSet: Boolean;
+
+    trigger OnInsertRecord(BelowxRec: Boolean): Boolean
+    begin
+        Rec.Insert(true);
+
+        if IsInvoiceDateSet then begin
+            Rec.Validate("Document Date", InvoiceDateVar);
+            Rec.Modify(true);
+        end;
+
+        exit(false);
+    end;
+
+    trigger OnModifyRecord(): Boolean
+    begin
+        if IsInvoiceDateSet then begin
+            Rec.Validate("Document Date", InvoiceDateVar);
+        end;
+
+        Rec.Modify(true);
+        exit(false);
+    end;
 
     trigger OnAfterGetRecord()
     var
         Vendor: Record Vendor;
         Currency: Record Currency;
     begin
+        InvoiceDateVar := Rec."Document Date";
+
         // Calculate FlowFields for Totals
         Rec.CalcFields(Amount, "Amount Including VAT", "Invoice Discount Amount");
 
