@@ -174,12 +174,24 @@ page 50100 "APIV2 - Purchase Invoice Lines"
     trigger OnInsertRecord(BelowxRec: Boolean): Boolean
     var
         PurchaseHeader: Record "Purchase Header";
+        PurchaseLine: Record "Purchase Line";
     begin
+        // 1. Link to Header
         if (Rec."Document No." = '') and (not IsNullGuid(HeaderId)) then begin
             if PurchaseHeader.GetBySystemId(HeaderId) then begin
                 Rec.Validate("Document Type", PurchaseHeader."Document Type");
                 Rec.Validate("Document No.", PurchaseHeader."No.");
             end;
+        end;
+
+        // 2. Auto-Calculate Line Number if it is 0
+        if Rec."Line No." = 0 then begin
+            PurchaseLine.SetRange("Document Type", Rec."Document Type");
+            PurchaseLine.SetRange("Document No.", Rec."Document No.");
+            if PurchaseLine.FindLast() then
+                Rec."Line No." := PurchaseLine."Line No." + 10000
+            else
+                Rec."Line No." := 10000;
         end;
     end;
 
