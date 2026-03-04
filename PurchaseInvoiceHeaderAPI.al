@@ -11,7 +11,6 @@ page 50101 "APIV2 - Purchase Invoices"
     DelayedInsert = true;
     ODataKeyFields = SystemId;
 
-    // Filter to show only Invoices
     SourceTableView = where("Document Type" = const(Invoice));
 
     layout
@@ -174,8 +173,6 @@ page 50101 "APIV2 - Purchase Invoices"
                     Editable = false;
                 }
 
-                // --- SPECIFIC REQUEST: WHT (Withholding Tax) ---
-                // Assumes "IRPF Withholding Tax Group" exists in your table/extension
                 field(whtTaxCode; Rec."IRPF Withholding Tax Group")
                 {
                     Caption = 'WHT Tax Group';
@@ -185,9 +182,7 @@ page 50101 "APIV2 - Purchase Invoices"
                 part(purchaseInvoiceLines; "APIV2 - Purchase Invoice Lines")
                 {
                     Caption = 'Lines';
-                    EntityName = 'purchaseInvoiceLine';
-                    EntitySetName = 'purchaseInvoiceLines';
-                    // The link must ensure Document Type is handled first
+                    // FIX: Removed EntityName and EntitySetName to prevent metadata confusion
                     SubPageLink = "Document Type" = field("Document Type"), "Document No." = field("No.");
                 }
             }
@@ -201,6 +196,12 @@ page 50101 "APIV2 - Purchase Invoices"
         InvoiceDateVar: Date;
         IsInvoiceDateSet: Boolean;
 
+    trigger OnNewRecord(BelowxRec: Boolean)
+    begin
+        // FIX: Ensure OData framework knows the context immediately
+        Rec."Document Type" := Rec."Document Type"::Invoice;
+    end;
+
     trigger OnInsertRecord(BelowxRec: Boolean): Boolean
     begin
         Rec.Insert(true);
@@ -209,6 +210,9 @@ page 50101 "APIV2 - Purchase Invoices"
             Rec.Validate("Document Date", InvoiceDateVar);
             Rec.Modify(true);
         end;
+
+        // FIX: Force OData to pull the fully committed record and its SystemId
+        Rec.Get(Rec."Document Type", Rec."No.");
 
         exit(false);
     end;

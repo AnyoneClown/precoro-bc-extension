@@ -45,7 +45,6 @@ page 50100 "APIV2 - Purchase Invoice Lines"
                     Caption = 'Sequence';
                 }
 
-                // --- CHANGED: Using Variable Proxy instead of Rec.Type ---
                 field(lineType; LineTypeBuffer)
                 {
                     Caption = 'Line Type';
@@ -77,8 +76,6 @@ page 50100 "APIV2 - Purchase Invoice Lines"
                     Caption = 'No.';
                 }
 
-                // ... (Keep the rest of your layout exactly the same) ...
-                // Standard ItemId/AccountId lookups, Description, Quantity, etc.
                 field(itemId; ItemId)
                 {
                     Caption = 'Item Id';
@@ -169,7 +166,12 @@ page 50100 "APIV2 - Purchase Invoice Lines"
         UOMId: Guid;
         VariantId: Guid;
         LocationId: Guid;
-        LineTypeBuffer: Text; // New variable to hold the JSON string
+        LineTypeBuffer: Text;
+
+    trigger OnNewRecord(BelowxRec: Boolean)
+    begin
+        Rec."Document Type" := Rec."Document Type"::Invoice;
+    end;
 
     trigger OnInsertRecord(BelowxRec: Boolean): Boolean
     var
