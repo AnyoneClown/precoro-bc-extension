@@ -35,7 +35,7 @@ page 50102 "APIV2 - Purchase Credit Memos"
                 }
 
                 // --- DATES ---
-                field(documentDate; DocumentDateVar)
+                field(creditMemoDate; DocumentDateVar)
                 {
                     Caption = 'Document Date';
                     trigger OnValidate()
