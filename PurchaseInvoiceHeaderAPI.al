@@ -60,7 +60,19 @@ page 50101 "APIV2 - Purchase Invoices"
                     trigger OnValidate()
                     var
                         Vendor: Record Vendor;
+                        CurrentVendor: Record Vendor;
+                        CurrentVendorId: Guid;
                     begin
+                        if Rec."Buy-from Vendor No." <> '' then begin
+                            if CurrentVendor.Get(Rec."Buy-from Vendor No.") then
+                                CurrentVendorId := CurrentVendor.SystemId;
+
+                            if CurrentVendorId = VendorId then
+                                exit;
+
+                            Error('Changing vendorId is not allowed.');
+                        end;
+
                         if Vendor.GetBySystemId(VendorId) then begin
                             Rec.Validate("Buy-from Vendor No.", Vendor."No.");
                         end;
@@ -82,7 +94,19 @@ page 50101 "APIV2 - Purchase Invoices"
                     trigger OnValidate()
                     var
                         Vendor: Record Vendor;
+                        CurrentVendor: Record Vendor;
+                        CurrentVendorId: Guid;
                     begin
+                        if Rec."Pay-to Vendor No." <> '' then begin
+                            if CurrentVendor.Get(Rec."Pay-to Vendor No.") then
+                                CurrentVendorId := CurrentVendor.SystemId;
+
+                            if CurrentVendorId = PayToVendorId then
+                                exit;
+
+                            Error('Changing payToVendorId is not allowed.');
+                        end;
+
                         if Vendor.GetBySystemId(PayToVendorId) then begin
                             Rec.Validate("Pay-to Vendor No.", Vendor."No.");
                         end;
@@ -182,7 +206,8 @@ page 50101 "APIV2 - Purchase Invoices"
                 part(purchaseInvoiceLines; "APIV2 - Purchase Invoice Lines")
                 {
                     Caption = 'Lines';
-                    // FIX: Removed EntityName and EntitySetName to prevent metadata confusion
+                    EntityName = 'purchaseInvoiceLine';
+                    EntitySetName = 'purchaseInvoiceLines';
                     SubPageLink = "Document Type" = field("Document Type"), "Document No." = field("No.");
                 }
             }

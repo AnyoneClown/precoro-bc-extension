@@ -48,25 +48,30 @@ page 50100 "APIV2 - Purchase Invoice Lines"
                 field(lineType; LineTypeBuffer)
                 {
                     Caption = 'Line Type';
-                    ToolTip = 'Specifies the type of line (Account, Item, etc.)';
 
                     trigger OnValidate()
                     begin
                         case LowerCase(LineTypeBuffer) of
                             'account', 'g/l account':
-                                Rec.Validate(Type, Rec.Type::"G/L Account");
+                                if Rec.Type <> Rec.Type::"G/L Account" then
+                                    Rec.Validate(Type, Rec.Type::"G/L Account");
                             'item':
-                                Rec.Validate(Type, Rec.Type::Item);
+                                if Rec.Type <> Rec.Type::Item then
+                                    Rec.Validate(Type, Rec.Type::Item);
                             'resource':
-                                Rec.Validate(Type, Rec.Type::Resource);
+                                if Rec.Type <> Rec.Type::Resource then
+                                    Rec.Validate(Type, Rec.Type::Resource);
                             'fixed asset':
-                                Rec.Validate(Type, Rec.Type::"Fixed Asset");
+                                if Rec.Type <> Rec.Type::"Fixed Asset" then
+                                    Rec.Validate(Type, Rec.Type::"Fixed Asset");
                             'charge (item)':
-                                Rec.Validate(Type, Rec.Type::"Charge (Item)");
+                                if Rec.Type <> Rec.Type::"Charge (Item)" then
+                                    Rec.Validate(Type, Rec.Type::"Charge (Item)");
                             'comment':
-                                Rec.Validate(Type, Rec.Type::" ");
+                                if Rec.Type <> Rec.Type::" " then
+                                    Rec.Validate(Type, Rec.Type::" ");
                             else
-                                Error('Invalid Line Type: %1. Allowed values are: Account, Item, Resource, Fixed Asset, Charge (Item), Comment', LineTypeBuffer);
+                                Error('Invalid Line Type...');
                         end;
                     end;
                 }
@@ -97,8 +102,10 @@ page 50100 "APIV2 - Purchase Invoice Lines"
                         GLAccount: Record "G/L Account";
                     begin
                         if GLAccount.GetBySystemId(AccountId) then begin
-                            Rec.Validate(Type, Rec.Type::"G/L Account");
-                            Rec.Validate("No.", GLAccount."No.");
+                            if (Rec.Type <> Rec.Type::"G/L Account") or (Rec."No." <> GLAccount."No.") then begin
+                                Rec.Validate(Type, Rec.Type::"G/L Account");
+                                Rec.Validate("No.", GLAccount."No.");
+                            end;
                         end;
                     end;
                 }
