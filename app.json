@@ -16,6 +16,12 @@
       "name": "Prodware - Retentions Module",
       "publisher": "Prodware Spain, S.A.",
       "version": "26.4.20250908.1"
+    },
+    {
+      "id": "98506fba-bc45-46ca-8f21-28977691bd2c",
+      "name": "PRODWARE Schema-Extension",
+      "publisher": "Prodware Spain",
+      "version": "25.0.0.2"
     }
   ],
   "screenshots": [],

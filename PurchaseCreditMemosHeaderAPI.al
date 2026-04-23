@@ -69,11 +69,10 @@ page 50102 "APIV2 - Purchase Credit Memos"
 
                             if CurrentVendorId = VendorId then
                                 exit;
-
-                            Error('Changing vendorId is not allowed.');
                         end;
 
                         if Vendor.GetBySystemId(VendorId) then begin
+                            Rec.SetHideValidationDialog(true);
                             Rec.Validate("Buy-from Vendor No.", Vendor."No.");
                         end;
                     end;
@@ -103,11 +102,10 @@ page 50102 "APIV2 - Purchase Credit Memos"
 
                             if CurrentVendorId = PayToVendorId then
                                 exit;
-
-                            Error('Changing payToVendorId is not allowed.');
                         end;
 
                         if Vendor.GetBySystemId(PayToVendorId) then begin
+                            Rec.SetHideValidationDialog(true);
                             Rec.Validate("Pay-to Vendor No.", Vendor."No.");
                         end;
                     end;

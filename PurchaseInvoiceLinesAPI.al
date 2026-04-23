@@ -44,7 +44,6 @@ page 50100 "APIV2 - Purchase Invoice Lines"
                 {
                     Caption = 'Sequence';
                 }
-
                 field(lineType; LineTypeBuffer)
                 {
                     Caption = 'Line Type';
@@ -162,6 +161,7 @@ page 50100 "APIV2 - Purchase Invoice Lines"
 
                 field(irpfTaxPercent; Rec."IRPF Withholding Tax %") { Caption = 'IRPF Withholding Tax %'; }
                 field(irpfTaxAmount; Rec."IRPF Withholding Tax amt.") { Caption = 'IRPF Withholding Tax Amount'; Editable = false; }
+                field(vendorContractNumber; Rec."Contrato proveedor") { Caption = 'Vendor Contract Number'; }
             }
         }
     }
