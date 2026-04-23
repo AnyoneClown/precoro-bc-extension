@@ -162,6 +162,9 @@ page 50100 "APIV2 - Purchase Invoice Lines"
                 field(irpfTaxPercent; Rec."IRPF Withholding Tax %") { Caption = 'IRPF Withholding Tax %'; }
                 field(irpfTaxAmount; Rec."IRPF Withholding Tax amt.") { Caption = 'IRPF Withholding Tax Amount'; Editable = false; }
                 field(vendorContractNumber; Rec."Contrato proveedor") { Caption = 'Vendor Contract Number'; }
+                field(purchaseOrderNumber; Rec."No. Documento PO") { Caption = 'Purchase Order Number'; }
+
+
             }
         }
     }
